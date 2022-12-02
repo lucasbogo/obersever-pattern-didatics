@@ -13,6 +13,10 @@ class Person(PropertyObservable):
   def __init__(self, age=0):
     super().__init__()
     self._age = age
+    
+  @property
+  def can_vote(self):
+      return self._age >= 18
 
   @property
   def age(self):
@@ -22,9 +26,28 @@ class Person(PropertyObservable):
   def age(self, value):
     if self._age == value:
       return
+  
+    # Cach the old can vote value then compare to current value
+    old_can_vote = self.can_vote
+  
     self._age = value
     self.property_changed('age', value)
+    
+    if old_can_vote != self.can_vote:
+        self.property_changed('can_vote', self.can_vote)
 
+if __name__ == '__main__':
+    def person_changed(name, value):
+        if name == 'can_vote':
+            print(f'Voting ability changed to {value}')
+    
+    p = Person()
+    p.property_changed.append(person_changed)
+    
+    # Cicle the person value
+    for age in range(16, 21):
+        print(f'Changing age to {age}')
+        p.age = age
 
 class TrafficAuthority:
   def __init__(self, person):
